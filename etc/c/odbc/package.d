@@ -39,6 +39,9 @@ version(SPARC64) {
 version(HPPA64) {
     public import etc.c.odbc.odbc64;
 }
+version(IA64) {
+    public import etc.c.odbc.odbc64;
+}
 
 //32-bit architectures
 version(X86) {
