@@ -9,6 +9,8 @@
 
 Declarations for interfacing with the ODBC library.
 
+The prior version of the ODBC bindings has been deprecated and will be removed in a future release.
+
 See_Also: $(LINK2 https://docs.microsoft.com/en-us/sql/odbc/reference/syntax/odbc-api-reference,
             ODBC API Reference on MSDN)
  */
@@ -62,10 +64,9 @@ version(HPPA) {
 }
 
 // Manually converted enums
-public enum string SQL_SPEC_STRING = "04.00";
-public enum string SQL_OPT_TRACE_FILE_DEFAULT = "\\SQL.LOG";
-public enum SQL_CA2_MAX_ROWS_AFFECTS_ALL = SQL_CA2_MAX_ROWS_SELECT | SQL_CA2_MAX_ROWS_INSERT |
-                                    SQL_CA2_MAX_ROWS_DELETE | SQL_CA2_MAX_ROWS_UPDATE | SQL_CA2_MAX_ROWS_CATALOG;
+public enum int ODBCVER = 0x0400;
+public enum int SQL_CA2_MAX_ROWS_AFFECTS_ALL = SQL_CA2_MAX_ROWS_SELECT | SQL_CA2_MAX_ROWS_INSERT |
+                SQL_CA2_MAX_ROWS_DELETE | SQL_CA2_MAX_ROWS_UPDATE | SQL_CA2_MAX_ROWS_CATALOG;
 public enum string SQL_ALL_CATALOGS = "%";
 public enum string SQL_ALL_SCHEMAS = "%";
 public enum string SQL_ALL_TABLE_TYPES = "%";

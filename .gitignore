@@ -3,4 +3,5 @@
 *.pdb
 
 .vscode/
+.dub/
 generated/

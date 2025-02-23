@@ -104,6 +104,10 @@ private void alterHeader(string fileName) {
 			tline = "//" ~ tline;
 		}
 
+		if (tline.canFind("#define OBDCVER")) {
+			tline = "//" ~ tline;
+		}
+
 		result ~= tline ~ "\n";
 	}
 
