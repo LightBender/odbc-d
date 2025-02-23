@@ -1,0 +1,5 @@
+name "odbcgen"
+description "App to generate Phobos ODBC modules via ImportC."
+authors "Adam Wilson"
+copyright "Copyright © 2025, Adam Wilson"
+license "BSL-1.0"
