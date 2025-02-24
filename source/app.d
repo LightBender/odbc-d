@@ -82,6 +82,11 @@ private void alterHeader(string fileName) {
 	foreach (line; header.byLine()) {
 		string tline = line.text.strip();
 
+		long ic = tline.countUntil("//");
+		if (ic > 0) {
+			tline = tline[0..ic];
+		}
+
 		//Skip these Windows specific lines
 		if (tline.canFind("#pragma") && tline.canFind("region")) continue;
 		if (tline.canFind("WINAPI_FAMILY_PARTITION")) continue;
@@ -101,10 +106,6 @@ private void alterHeader(string fileName) {
 		}
 
 		if (tline.canFind("#define") && tline.canFind("SQL_")) {
-			tline = "//" ~ tline;
-		}
-
-		if (tline.canFind("#define OBDCVER")) {
 			tline = "//" ~ tline;
 		}
 
@@ -129,7 +130,7 @@ private void alterIntermediateFile(string fileName) {
 		if (line.strip() == string.init) continue;
 		if (line.canFind("#define SQL_API")) continue;
 
-		if (line.canFind("//#define") && line.canFind("SQL_")) {
+		if (line.canFind("//#define")) {
 			line = line[2..$];
 		}
 
@@ -164,6 +165,8 @@ private void alterDFile(string fileName) {
 			c++;
 			continue;
 		}
+
+		if (line.canFind("struct tag") && line.canFind(";")) continue;
 
 		result ~= line ~ "\n";
 	}

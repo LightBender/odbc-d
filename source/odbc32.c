@@ -5,6 +5,7 @@
 #define WORD unsigned short
 #define __int64 long long
 
+//#define ODBCVER 0x0400
 #define ODBCVER 0x0400
 
 #include <sal.h>
