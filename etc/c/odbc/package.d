@@ -1,30 +1,34 @@
 /**
  * ODBC Header Module
  *
- * ImportC translation from the $(LINK2 https://github.com/microsoft/ODBC-Specification,
-                                  ODBC 4.0 Specification) Headers.
+ * Cross-platform D translation of the $(LINK2 https://github.com/microsoft/ODBC-Specification,
+ * ODBC 4.0 Specification) headers. This package publicly re-exports the full
+ * ODBC 4.0 C API surface and adds D translations of the function-like C macros
+ * from the original headers (in D, C macros are expressed as functions).
+ *
+ * The platform is selected purely from D's predefined version identifiers:
+ *
+ * $(UL
+ *   $(LI `version (Windows)` links `odbc32` and uses the `__stdcall` ABI;
+ *        `SQLWCHAR` is a 2-byte `wchar`.)
+ *   $(LI `version (OSX)` links `iodbc`; `SQLWCHAR` is a 4-byte `dchar`.)
+ *   $(LI other Posix platforms link `odbc` (unixODBC); `SQLWCHAR` is a
+ *        2-byte `wchar`.)
+ * )
  *
  * License: $(LINK2 http://www.boost.org/LICENSE_1_0.txt, Boost License 1.0)
  * Source: $(PHOBOSSRC etc/c/odbc/_package.d)
-
-Declarations for interfacing with the ODBC library.
-
-The prior version of the ODBC bindings has been deprecated and will be removed in a future release.
-
-See_Also: $(LINK2 https://docs.microsoft.com/en-us/sql/odbc/reference/syntax/odbc-api-reference,
-            ODBC API Reference on MSDN)
+ *
+ * See_Also: $(LINK2 https://docs.microsoft.com/en-us/sql/odbc/reference/syntax/odbc-api-reference,
+ *           ODBC API Reference on MSDN)
  */
 
 module etc.c.odbc;
 
-static if (size_t.sizeof == 8)
-{
-    public import etc.c.odbc.odbc64;
-}
-else
-{
-    public import etc.c.odbc.odbc32;
-}
+public import etc.c.odbc.sqltypes;
+public import etc.c.odbc.sql;
+public import etc.c.odbc.sqlext;
+public import etc.c.odbc.sqlucode;
 
 // Manually converted enums
 public enum int SQL_CA2_MAX_ROWS_AFFECTS_ALL = SQL_CA2_MAX_ROWS_SELECT | SQL_CA2_MAX_ROWS_INSERT |
@@ -61,3 +65,80 @@ TO,TRAILING,TRANSACTION,TRANSLATE,TRANSLATION,TRIM,TRUE,
 UNION,UNIQUE,UNKNOWN,UPDATE,UPPER,USAGE,USER,USING,
 VALUE,VALUES,VARCHAR,VARYING,VIEW,WHEN,WHENEVER,WHERE,WITH,WORK,WRITE,
 YEAR,ZONE";
+
+/*
+ * The original ODBC headers expose a number of function-like preprocessor
+ * macros. D has no preprocessor, so they are translated to ordinary functions
+ * here. They are kept `@nogc nothrow` to match the bindings; the pure helpers
+ * are additionally `pure @safe`.
+ */
+
+/// Returns `true` if `rc` is `SQL_SUCCESS` or `SQL_SUCCESS_WITH_INFO`.
+pragma(inline, true)
+bool SQL_SUCCEEDED(SQLRETURN rc) @nogc nothrow pure @safe
+{
+    return (rc & ~1) == 0;
+}
+
+/// Encodes a data-at-execution length for `SQLBindParameter`'s indicator value.
+pragma(inline, true)
+SQLLEN SQL_LEN_DATA_AT_EXEC(SQLLEN length) @nogc nothrow pure @safe
+{
+    return -length + SQL_LEN_DATA_AT_EXEC_OFFSET;
+}
+
+/// Encodes a binary length for a driver-specific descriptor attribute.
+pragma(inline, true)
+SQLLEN SQL_LEN_BINARY_ATTR(SQLLEN length) @nogc nothrow pure @safe
+{
+    return -length + SQL_LEN_BINARY_ATTR_OFFSET;
+}
+
+/// Tests the bit for `uwAPI` in a `SQLGetFunctions` existence bitmap.
+pragma(inline, true)
+SQLUSMALLINT SQL_FUNC_EXISTS(scope const(SQLUSMALLINT)* pfExists, SQLUSMALLINT uwAPI) @nogc nothrow pure
+{
+    return (pfExists[uwAPI >> 4] & (1 << (uwAPI & 0x000F))) ? SQL_TRUE : SQL_FALSE;
+}
+
+/// Convenience wrapper for `SQLSetPos` positioning the cursor at `irow`.
+pragma(inline, true)
+SQLRETURN SQL_POSITION_TO(SQLHSTMT hstmt, SQLSETPOSIROW irow) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_POSITION, SQL_LOCK_NO_CHANGE);
+}
+
+/// Convenience wrapper for `SQLSetPos` locking record `irow`.
+pragma(inline, true)
+SQLRETURN SQL_LOCK_RECORD(SQLHSTMT hstmt, SQLSETPOSIROW irow, SQLUSMALLINT fLock) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_POSITION, fLock);
+}
+
+/// Convenience wrapper for `SQLSetPos` refreshing record `irow`.
+pragma(inline, true)
+SQLRETURN SQL_REFRESH_RECORD(SQLHSTMT hstmt, SQLSETPOSIROW irow, SQLUSMALLINT fLock) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_REFRESH, fLock);
+}
+
+/// Convenience wrapper for `SQLSetPos` updating record `irow`.
+pragma(inline, true)
+SQLRETURN SQL_UPDATE_RECORD(SQLHSTMT hstmt, SQLSETPOSIROW irow) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_UPDATE, SQL_LOCK_NO_CHANGE);
+}
+
+/// Convenience wrapper for `SQLSetPos` deleting record `irow`.
+pragma(inline, true)
+SQLRETURN SQL_DELETE_RECORD(SQLHSTMT hstmt, SQLSETPOSIROW irow) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_DELETE, SQL_LOCK_NO_CHANGE);
+}
+
+/// Convenience wrapper for `SQLSetPos` adding a record at `irow`.
+pragma(inline, true)
+SQLRETURN SQL_ADD_RECORD(SQLHSTMT hstmt, SQLSETPOSIROW irow) @nogc nothrow
+{
+    return SQLSetPos(hstmt, irow, SQL_ADD, SQL_LOCK_NO_CHANGE);
+}

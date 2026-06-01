@@ -1,7 +1,12 @@
 *.exe
 *.obj
 *.pdb
+*.a
+*.lib
 
 .vscode/
 .dub/
 generated/
+dub.selections.json
+
+odbc-d-test-*

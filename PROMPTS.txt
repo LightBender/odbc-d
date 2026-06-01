@@ -1,0 +1,17 @@
+Consider the C++ header files in spec/Windows/inc. These files make up the standard ODBC 4.0 C interface. The plan is to convert those headers in to DI files for D programming language that can be used to call the ODBC C library directly. As ODBC is cross platform we will need consider what is available on each platform supported by D. Next, we will want to consider the A and W method variants for handling 1-byte and a 2-byte wide characters. In D, C macros can be implemented as template functions. You can ignore any Windows-only and Microsoft-only code such as the Visual Studio integration. The output can be placed in the etc/c/odbc folder.
+
+Once the conversion is complete we want to create a D-native wrapper API around the C-native ODBC API. This is due to two factors, first D has native types for strings/wide-strings that need to be converted to match the C-native ODBC API and it would be useful to be able to call the API using D-native types. Second, we want to use a result-type model for return values, so that we can report errors and return values without using Exceptions. D has no native Result type so one will need to be created for this project.
+
+The predefined version identifiers should be sufficient to determine which version of ODBC is in use as each platform will provide it's own version of the driver. For example, a version(OSX) would be sufficient to know that iODBC is in use.
+The result type must also include a text buffer to include the specific error message to aid in debugging of user apps as some errors contain information that is specific to the user's database.
+1. Use .di files.
+2. Use the wide API's by default.
+3. You can replace the generator approach entirely. It was only used as a driver for ImportC and this new approach will obviate it.
+
+Now, let's wrap each individual ODBC method in a D-native method using the helper methods we just created in core.d. We should use D-native types in the API, translating those types to the appropriate ODBC API types, and return a Result with any relevant error data. This API can be placed in the odbc folder in a file called api.d. We should also add a package.d file to the odbc folder.
+
+Can we make the ODBC 4.0 opt-in at compile on all platforms except Windows (where they are available)? This could be done with a DUB configuration and version specifier or similar mechanism. Also I noticed that in the api.d file, the Catalog functions appear to return a void, is that correct for methods are supposed to list out data about a table? I would expect them to return a type or array of types.
+
+It looks like iODBC only supports ODBC 3.5, lets add an ODBC35 that removes all the methods from anything greater than that version and make it the default on OSX and nowhere else, like we did with the Windows 4.0 version above.
+
+Please generate the appropriate markdown readme for this project and place the text into the README.md file. Include a brief description of the project and the standard information typically included in a README for an open source project, information on how to add this project via DUB, a few examples of how to use the ODBC API, a note with a table describe what API levels are supported on which platforms, and contribution guidelines that include a note saying that any LLM based contributions must include the Prompt used to generate the contribution in the PROMPTS.txt file.

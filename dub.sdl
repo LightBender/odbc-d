@@ -1,5 +1,41 @@
-name "odbcgen"
-description "App to generate Phobos ODBC modules via ImportC."
+name "odbc-d"
+description "Cross-platform D bindings and a D-native wrapper for the ODBC 4.0 C API."
 authors "Adam Wilson"
-copyright "Copyright © 2025, Adam Wilson"
+copyright "Copyright © 2026, Adam Wilson"
 license "BSL-1.0"
+
+targetType "library"
+
+sourcePaths "."
+importPaths "."
+
+libs "odbc32" platform="windows"
+libs "iodbc" platform="osx"
+libs "odbc" platform="posix"
+
+// ODBC 4.0 entry points ship in the Windows driver manager, so enable them
+// unconditionally there. On other platforms they require an ODBC 4.0-capable
+// driver manager and are therefore opt-in (see the "odbc4" configuration).
+versions "ODBC4" platform="windows"
+
+// iODBC on macOS implements only ODBC 3.5, so cap the surface there by
+// defining ODBC35, which excludes every entry point newer than 3.5 (the
+// ODBC 3.8 functions SQLCancelHandle and SQLCompleteAsync).
+versions "ODBC35" platform="osx"
+
+// Default build: full 4.0 on Windows, ODBC 3.5 on macOS (iODBC), and the
+// ODBC 3.8 surface on other POSIX platforms (unixODBC).
+configuration "library" {
+}
+
+// Opt-in build enabling the ODBC 4.0 additions on every platform. Requires an
+// ODBC 4.0-capable driver manager at link/run time.
+configuration "odbc4" {
+	versions "ODBC4"
+}
+
+// Opt-in build capping the surface at ODBC 3.5 on any platform. Useful when
+// linking against a driver manager (such as iODBC) that predates ODBC 3.8.
+configuration "odbc35" {
+	versions "ODBC35"
+}
