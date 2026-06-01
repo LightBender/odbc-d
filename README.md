@@ -21,7 +21,7 @@ dub add odbc-d
 
 Or add it to your `dub.sdl`:
 ```sdl
-dependency "odbc-d" version="~>1.0.0"
+dependency "odbc-d" version="~>4.0.0"
 ```
 
 ## Platform API Levels
